@@ -29,7 +29,7 @@ class Blockchain {
     constructor(difficulty) {
         var genesisBlock = new Block("0", "empty")
         this.chain = [genesisBlock]
-        this.transactions = 
+        this.transactions = transactionFile.transactions
         this.difficulty = difficulty
         this.maxTransactions = 5
     }
@@ -45,13 +45,30 @@ class Blockchain {
         return true
     }
 
-    mineBlock() {
-        this.transactions
-
-        var block = new Block(this.chain[this.chain.length - 1].hash, ts)
-        block.mine(this.difficulty)
-
-        this.chain.push(block)
+    mineBlock(minerAddress) {
+        var blockTransactions = []
+        if (this.transactions.length > 0) {
+            for (var i = 0; i < this.maxTransactions; i++) {
+                if (this.transactions.length > 0) {
+                    blockTransactions.push(this.transactions.pop())
+                }
+                else {
+                    // In the event that there are no more transactions
+                    // this will move on to mining what it can
+                    console.log("There are no more transactions, mining with " + blockTransactions.length + " transaction(s).")
+                    break
+                }
+            }
+    
+            var block = new Block(this.chain[this.chain.length - 1].hash, blockTransactions)
+            block.mine(this.difficulty)
+    
+            this.chain.push(block)
+            console.log("Block added: " + block.hash + " Transactions: " + block.transactions.length)
+        }
+        else {
+            console.log("There are no transactions, cannot mine.")
+        }
     }
 }
 
@@ -64,6 +81,13 @@ class Transaction {
     }
 }
 
+// The parameter states the difficulty of the blockchain to be mined
 var c = new Blockchain(5)
 
-console.log(c.transactions)
+var minerAddress = "jeremy"
+
+console.log("Mining started...")
+while (c.transactions.length > 0) {
+    console.log("Attempting to mine.")
+    c.mineBlock(minerAddress)
+}
