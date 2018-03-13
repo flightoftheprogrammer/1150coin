@@ -32,6 +32,7 @@ class Blockchain {
         this.transactions = transactionFile.transactions
         this.difficulty = difficulty
         this.maxTransactions = 5
+        this.miningReward = 10
     }
 
     validateBlocks() {
@@ -65,10 +66,24 @@ class Blockchain {
     
             this.chain.push(block)
             console.log("Block added: " + block.hash + " Transactions: " + block.transactions.length)
+
+            this.transactions.push(new Transaction("", minerAddress, this.miningReward))
+            console.log("Mining reward distributed.")
         }
         else {
             console.log("There are no transactions, cannot mine.")
         }
+    }
+
+    getBalance(address) {
+        var balance = 0
+        this.chain.forEach((block) => {
+            for (var i = 0; i < block.transactions.length; i++) {
+                if (block.transactions[i].toAddress == address) balance += block.transactions[i].amount
+                if (block.transactions[i].fromAddress == address) balance -= block.transactions[i].amount
+            }
+        })
+        return balance
     }
 }
 
@@ -84,10 +99,24 @@ class Transaction {
 // The parameter states the difficulty of the blockchain to be mined
 var c = new Blockchain(5)
 
-var minerAddress = "jeremy"
+// This can be anything
+var minerAddress = "miner"
 
 console.log("Mining started...")
-while (c.transactions.length > 0) {
+
+// This will make sure that the loop will end.
+// Miners shouldn't be able to infinitely mine
+// their own transaction reward
+while (c.transactions.length > 1) {
     console.log("Attempting to mine.")
     c.mineBlock(minerAddress)
 }
+
+console.log("\n\nBalances:")
+console.log("Miner: " + c.getBalance("miner")) // this should match the miner address
+console.log("Paul: " + c.getBalance("paul"))
+console.log("Kenn: " + c.getBalance("kenn"))
+console.log("Jenn: " + c.getBalance("jenn"))
+console.log("Bob: " + c.getBalance("bob"))
+console.log("Alex: " + c.getBalance("jenn"))
+console.log("John: " + c.getBalance("john"))
